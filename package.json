@@ -1,0 +1,24 @@
+{
+	"name": "get-title-for-1day-from-notion-database",
+	"version": "0.0.0",
+	"private": true,
+	"scripts": {
+		"deploy": "wrangler deploy",
+		"dev": "wrangler dev",
+		"start": "wrangler dev",
+		"test": "vitest",
+		"cf-typegen": "wrangler types"
+	},
+	"devDependencies": {
+		"@cloudflare/vitest-pool-workers": "^0.7.5",
+		"@cloudflare/workers-types": "^4.20250410.0",
+		"typescript": "^5.5.2",
+		"vitest": "~3.0.7",
+		"wrangler": "^4.10.0"
+	},
+	"dependencies": {
+		"@notionhq/client": "^2.3.0",
+		"date-fns": "^4.1.0",
+		"date-fns-tz": "^3.2.0"
+	}
+}
