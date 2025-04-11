@@ -4,6 +4,10 @@ import { formatInTimeZone } from 'date-fns-tz'
 
 export default {
 	async fetch(request, env, ctx): Promise<Response> {
+		if (env.WORKER_SECRET && request.headers.get('x-secret') !== env.WORKER_SECRET) {
+			return new Response('Unauthorized', { status: 401 })
+		}
+
 		const tz = env.TZ || 'Asia/Tokyo'
 		const datePropertyName = env.DATE_PROPERTY_NAME || '作成日時'
 

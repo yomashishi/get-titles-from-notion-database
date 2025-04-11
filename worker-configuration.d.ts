@@ -5,6 +5,7 @@ declare namespace Cloudflare {
 	interface Env {
 		TZ: string;
 		DATE_PROPERTY_NAME: string;
+		WORKER_SECRET: string;
 	}
 }
 interface Env extends Cloudflare.Env {}
