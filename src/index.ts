@@ -65,30 +65,42 @@ async function action(
 		]
 	})
 
-	const titles = getTitles(response)
-	const titlesWithListNotation = titles.map(title => `- ${title}`)
+	const titleLinesWithListNotation = getTitleLinesWithListNotation(response)
 
-	return `${titlesWithListNotation.join('\n')}\n`
+	return `${titleLinesWithListNotation.join('\n')}\n`
 }
 
-function getTitles(response: SearchResponse): string[] {
-	const titles: string[] = []
+function getTitleLinesWithListNotation(response: SearchResponse): string[] {
+	const titleLinesWithListNotation: string[] = []
 	for (const page of response.results) {
 		if (!isFullPage(page)) {
 			continue
 		}
+
 		const post = page.properties.post
 		if (!post) {
 			continue
 		}
-
 		if (post.type !== 'title') {
 			continue
 		}
+
 		for (const richText of post.title) {
-			const title = richText.plain_text.split('\n')
-			titles.push(...title)
+			const titleLines = richText.plain_text.split('\n')
+
+			const titleLinesWithListNotationByPage = titleLines.map((title, index) => {
+				const line = `- ${title.trim()}`
+				if (index === 0) {
+					return line
+				}
+				
+				// 2行目以降はインデントをつける
+				return ' '.repeat(4) + line
+			})
+
+			titleLinesWithListNotation.push(...titleLinesWithListNotationByPage)
 		}
+	
 	}
-	return titles
+	return titleLinesWithListNotation
 }
