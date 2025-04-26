@@ -19,9 +19,7 @@ export default {
 		const notion = new Client({ auth: token })
 
 		const { searchParams } = new URL(request.url)
-		// TODO: dateがYYYY-MM-DD形式かどうかを事前に検査する
-		const dateQuery = searchParams.get('date') ?? new Date().toISOString()
-		const searchDate = formatInTimeZone(dateQuery, tz, 'yyyy-MM-dd')
+		const searchDate = searchParams.get('date') ?? new Date().toISOString()
 
 		const databaseId = searchParams.get('database_id')
 		if (!databaseId) {
@@ -34,6 +32,7 @@ export default {
 				databaseId,
 				datePropertyName,
 				searchDate,
+				tz,
 			)
 			return new Response(response)
 		} catch (error) {
@@ -48,14 +47,29 @@ async function action(
 	databaseId: string,
 	datePropertyName: string,
 	searchDate: string,
+	tz: string,
 ): Promise<string> {
+	// ISO8601 format
+	const startDate = formatInTimeZone(searchDate, tz, 'yyyy-MM-dd\'T\'00:00:00XXX')
+	const endDate = formatInTimeZone(searchDate, tz, 'yyyy-MM-dd\'T\'23:59:59XXX')
+
 	const response = await notion.databases.query({
 		database_id: databaseId,
 		filter: {
-			property: datePropertyName,
-			date: {
-				equals: searchDate,
-			},
+			and: [
+				{
+					property: datePropertyName,
+					date: {
+						after: startDate,
+					},
+				},
+				{
+					property: datePropertyName,
+					date: {
+						before: endDate,
+					},
+				}
+			]
 		},
 		sorts: [
 			{
@@ -93,14 +107,14 @@ function getTitleLinesWithListNotation(response: SearchResponse): string[] {
 				if (index === 0) {
 					return line
 				}
-				
+
 				// 2行目以降はインデントをつける
 				return ' '.repeat(4) + line
 			})
 
 			titleLinesWithListNotation.push(...titleLinesWithListNotationByPage)
 		}
-	
+
 	}
 	return titleLinesWithListNotation
 }
