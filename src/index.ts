@@ -2,30 +2,24 @@ import { Client, isFullPage } from '@notionhq/client'
 import type { SearchResponse } from '@notionhq/client/build/src/api-endpoints'
 import { formatInTimeZone } from 'date-fns-tz'
 
+interface RequestParams {
+	token: string
+	databaseId: string
+	searchDate: string
+}
+
 export default {
 	async fetch(request, env, ctx): Promise<Response> {
-		if (env.WORKER_SECRET && request.headers.get('x-secret') !== env.WORKER_SECRET) {
-			return new Response('Unauthorized', { status: 401 })
-		}
-
 		const tz = env.TZ || 'Asia/Tokyo'
 		const datePropertyName = env.DATE_PROPERTY_NAME || '作成日時'
 
-		const authorization = request.headers.get('authorization')
-		if (!authorization || !authorization.startsWith('Bearer ')) {
-			return new Response('Unauthorized', { status: 401 })
-		}
-		const token = authorization.split(' ')[1]
+		const validationResult = validateRequest(request, env)
+        if (validationResult instanceof Response) {
+            return validationResult
+        }
+		const { token, databaseId, searchDate } = validationResult
+
 		const notion = new Client({ auth: token })
-
-		const { searchParams } = new URL(request.url)
-		const searchDate = searchParams.get('date') ?? new Date().toISOString()
-
-		const databaseId = searchParams.get('database_id')
-		if (!databaseId) {
-			return new Response('Missing database_id', { status: 400 })
-		}
-
 		try {
 			const response = await action(
 				notion,
@@ -117,4 +111,31 @@ function getTitleLinesWithListNotation(response: SearchResponse): string[] {
 
 	}
 	return titleLinesWithListNotation
+}
+
+function validateRequest(request: Request, env: Env): RequestParams | Response {
+    if (env.WORKER_SECRET && request.headers.get('x-secret') !== env.WORKER_SECRET) {
+        return new Response('Unauthorized', { status: 401 })
+    }
+
+    const authorization = request.headers.get('authorization')
+    if (!authorization || !authorization.startsWith('Bearer ')) {
+        return new Response('Unauthorized', { status: 401 })
+    }
+    const token = authorization.split(' ')[1]
+
+    const { searchParams } = new URL(request.url)
+
+    const searchDate = searchParams.get('date') ?? new Date().toISOString()
+    const databaseId = searchParams.get('database_id')
+    if (!databaseId) {
+        return new Response('Missing database_id', { status: 400 })
+    }
+
+	const requestParams: RequestParams = {
+		token,
+		databaseId,
+		searchDate
+	}
+    return requestParams
 }
