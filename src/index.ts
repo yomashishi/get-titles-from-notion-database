@@ -21,7 +21,7 @@ export default {
 
 		const notion = new Client({ auth: token })
 		try {
-			const response = await action(
+			const response = await fetchTitlesByDate(
 				notion,
 				databaseId,
 				datePropertyName,
@@ -36,7 +36,7 @@ export default {
 	},
 } satisfies ExportedHandler<Env>
 
-async function action(
+async function fetchTitlesByDate(
 	notion: Client,
 	databaseId: string,
 	datePropertyName: string,
