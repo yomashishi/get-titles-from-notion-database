@@ -28,3 +28,7 @@ URLに `date` パラメータを `YYYY-MM-DD` 形式で指定すると、その�
 ### 認証
 
 Cloudflare Workersの環境変数に `WORKER_SECRET` が設定されている場合、リクエストヘッダに `x-secret: {YOUR_WORKER_SECRET}` を付与しないと利用できないように設定できます。
+
+```shell
+npx wrangler secret put WORKER_SECRET
+```
