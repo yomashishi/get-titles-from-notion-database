@@ -4,7 +4,7 @@
  */
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "get-title-for-1day-from-notion-database",
+	"name": "get-titles-from-notion-database",
 	"main": "src/index.ts",
 	"compatibility_date": "2025-04-10",
 	"observability": {

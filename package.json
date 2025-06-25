@@ -1,5 +1,5 @@
 {
-	"name": "get-title-for-1day-from-notion-database",
+	"name": "get-titles-from-notion-database",
 	"version": "0.0.0",
 	"private": true,
 	"scripts": {
