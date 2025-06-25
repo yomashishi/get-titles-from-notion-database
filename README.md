@@ -35,6 +35,8 @@ URLに `date` パラメータを `YYYY-MM-DD` 形式で指定すると、その�
 
 例: `https://{CLOUDFLARE_WORKERS_ENDPOINT}?database_id={YOUR_DATABASE_ID}&date=2025-04-10&to_date=2025-04-12`
 
+※100件を超えるデータには未対応です。
+
 ### 認証
 
 Cloudflare Workersの環境変数に `WORKER_SECRET` が設定されている場合、リクエストヘッダに `x-secret: {YOUR_WORKER_SECRET}` を付与しないと利用できないように設定できます。
