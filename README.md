@@ -1,11 +1,24 @@
 # get-titles-from-notion-database
 
-NotionのデータベースからタイトルをMarkdownのリスト形式で取得するやつ。
+NotionのデータベースからページタイトルをMarkdownのリスト形式で取得するやつ。
 Cloudflare Workers向けに実装しています。
 
 以下の運用をしているデータベースを想定しています。
 
 [Notionで運用するSNSライクな「つぶやき帳」｜こにゃ](https://note.com/ko_nyaku/n/nad80c3c570dd)
+
+## 開発方法
+
+```shell
+npm install
+npm run dev
+```
+
+環境変数を設定したい場合は `.dev.vars.example` から `.dev.vars` を作成します。
+
+```shell
+cp .dev.vars.example .dev.vars
+```
 
 ## 使い方
 
