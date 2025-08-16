@@ -1,6 +1,6 @@
 import { env } from 'cloudflare:test';
 import { describe, it, expect, vi } from 'vitest';
-import { checkHeader, newFetchParams } from '../src/params'
+import { checkHeader, newFetchParams, newParseParams } from '../src/params'
 
 // Notion APIを叩かないのでモックにする（読み込みに伴うcjsからの変換エラー回避でもある）
 vi.mock('@notionhq/client', () => {
@@ -88,7 +88,7 @@ describe('checkHeader', () => {
 	})
 })
 
-describe('parseQuery', () => {
+describe('newFetchParams', () => {
 	it('すべての対応パラメータを渡す', () => {
 		const url = new URL('https://example.com')
 		url.searchParams.set('database_id', 'dummy-database-id')
@@ -103,7 +103,6 @@ describe('parseQuery', () => {
 		}
 
 		expect(params.databaseId).equal('dummy-database-id')
-		expect(params.indent).equal(true)
 		expect(params.date).equal('2025-01-01')
 		expect(params.toDate).equal('2025-01-02')
 	})
@@ -227,18 +226,49 @@ describe('parseQuery', () => {
 			expect(params.toDate).equal('2025-01-01')
 		})
 	})
+})
+
+describe('newParseParams', () => {
+	it('すべての対応パラメータを渡す', () => {
+		const url = new URL('https://example.com')
+		url.searchParams.set('indent', '')
+
+		const request = new IncomingRequest(url.href)
+		const params = newParseParams(request, env)
+
+		expect(params.indent).equal(true)
+	})
+
+	describe('env', () => {
+		it('未設定の場合の初期値を確認する', () => {
+			env.TZ = ''
+
+			const url = new URL('https://example.com')
+
+			const request = new IncomingRequest(url.href)
+			const params = newParseParams(request, env)
+
+			expect(params.tz).equal('Asia/Tokyo')
+		})
+
+		it('設定されている場合は反映されること', () => {
+			env.TZ = 'UTC'
+
+			const url = new URL('https://example.com')
+
+			const request = new IncomingRequest(url.href)
+			const params = newParseParams(request, env)
+
+			expect(params.tz).equal('UTC')
+		})
+	})
 
 	it('indentを渡さない場合はindentがfalseとなること', () => {
 		const url = new URL('https://example.com')
-		url.searchParams.set('database_id', 'dummy-database-id')
 
 		const request = new IncomingRequest(url.href)
-		const params = newFetchParams(request, env)
-		if (params instanceof Response) {
-			expect.fail()
-		}
+		const params = newParseParams(request, env)
 
-		expect(params.databaseId).equal('dummy-database-id')
 		expect(params.indent).equal(false)
 	})
 })

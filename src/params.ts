@@ -1,9 +1,15 @@
+const defaultTimeZone = 'Asia/Tokyo'
+
 export interface FetchParams {
 	tz: string
 	datePropertyName: string
 	databaseId: string
 	date: string
 	toDate: string
+}
+
+export interface ParseParams {
+	tz: string
 	indent: boolean
 }
 
@@ -29,7 +35,7 @@ export function checkHeader(request: Request, env: Env): string | Response {
  * RequestとEnvから、Notion API実行用のパラメーターを生成する
  */
 export function newFetchParams(request: Request, env: Env): FetchParams | Response {
-	const tz = env.TZ || 'Asia/Tokyo'
+	const tz = env.TZ || defaultTimeZone
 	const datePropertyName = env.DATE_PROPERTY_NAME || '作成日時'
 
 	const { searchParams } = new URL(request.url)
@@ -52,14 +58,27 @@ export function newFetchParams(request: Request, env: Env): FetchParams | Respon
 		toDate = date
 	}
 
-	const indent = searchParams.has('indent')
 
-	return {
+	const fetchParams: FetchParams = {
 		tz,
 		datePropertyName,
 		databaseId,
 		date,
-		toDate,
+		toDate: toDate,
+	}
+	return fetchParams
+}
+
+export function newParseParams(request: Request, env: Env): ParseParams {
+	const tz = env.TZ || defaultTimeZone
+
+	const { searchParams } = new URL(request.url)
+
+	const indent = searchParams.has('indent')
+
+	const parseParams: ParseParams = {
+		tz,
 		indent,
-	} as FetchParams
+	}
+	return parseParams
 }

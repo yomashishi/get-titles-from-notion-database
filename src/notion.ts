@@ -1,9 +1,9 @@
 import { Client, isFullPage } from "@notionhq/client"
-import { FetchParams } from "./params"
+import { FetchParams, ParseParams } from "./params"
 import { formatInTimeZone } from "date-fns-tz"
-import { QueryDatabaseParameters, SearchResponse } from "@notionhq/client/build/src/api-endpoints"
+import { QueryDatabaseParameters, SearchParameters, SearchResponse } from "@notionhq/client/build/src/api-endpoints"
 
-export type NotionPost = {
+export interface NotionPost {
 	text: string;
 	created_date: string;
 }
@@ -11,12 +11,12 @@ export type NotionPost = {
 /**
  * タイトルの一覧をMarkdownのリスト形式で取得する
  */
-export async function fetchTitlesAsMarkdownList(notion: Client, params: FetchParams): Promise<string> {
-	const queryParams = newDatabaseQuery(params)
+export async function fetchTitlesAsMarkdownList(notion: Client, fetchParams: FetchParams, parseParams: ParseParams): Promise<string> {
+	const queryParams = newDatabaseQuery(fetchParams)
 	const response = await notion.databases.query(queryParams)
 
 	const posts = getPostsFromResponse(response)
-	return parseToMarkdown(posts, params.indent)
+	return parseToMarkdown(posts, parseParams)
 }
 
 /**
@@ -86,7 +86,7 @@ export function getPostsFromResponse(response: SearchResponse): NotionPost[] {
 /**
  * NotionPostの配列をMarkdown文字列に変換する
  */
-export function parseToMarkdown(posts: NotionPost[], indent: boolean): string {
+export function parseToMarkdown(posts: NotionPost[], params: ParseParams): string {
 	const titlesAsMarkdownList: string[] = []
 
 	for (const post of posts) {
@@ -99,7 +99,7 @@ export function parseToMarkdown(posts: NotionPost[], indent: boolean): string {
 			}
 
 			// 2行目以降
-			if (indent) {
+			if (params.indent) {
 				return ' '.repeat(4) + line
 			}
 			return line

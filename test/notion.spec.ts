@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { FetchParams } from '../src/params'
+import { FetchParams, ParseParams } from '../src/params'
 import { newDatabaseQuery, NotionPost, parseToMarkdown } from '../src/notion';
 
 // Notion APIを叩かないのでモックにする（読み込みに伴うcjsからの変換エラー回避でもある）
@@ -13,7 +13,6 @@ describe('newDatabaseQuery', () => {
 		datePropertyName: '作成日時',
 		date: '2025-06-25',
 		toDate: '2025-06-26',
-		indent: false,
 		tz: 'Asia/Tokyo',
 	}
 
@@ -80,13 +79,21 @@ describe('newDatabaseQuery', () => {
 })
 
 describe('parseToMarkdown', () => {
+	const baseParseParams: ParseParams = {
+		tz: 'Asia/Tokyo',
+		indent: false,
+	}
+
 	it('改行文字を含む+インデント設定無し', () => {
 		const post: NotionPost = {
 			text: 'foo\nbar',
 			created_date: '2022-03-01T19:05:00.000Z'
 		}
 
-		const result = parseToMarkdown([post], false)
+		const result = parseToMarkdown([post], {
+			...baseParseParams,
+			indent: false,
+		})
 		const expectedValue = `
 - foo
 - bar
@@ -100,7 +107,10 @@ describe('parseToMarkdown', () => {
 			created_date: '2022-03-01T19:05:00.000Z'
 		}
 
-		const result = parseToMarkdown([post], true)
+		const result = parseToMarkdown([post], {
+			...baseParseParams,
+			indent: true,
+		})
 		const expectedValue = `
 - foo
     - bar

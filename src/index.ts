@@ -1,5 +1,5 @@
 import { Client } from '@notionhq/client'
-import { checkHeader, newFetchParams } from './params'
+import { checkHeader, newFetchParams, newParseParams } from './params'
 import { fetchTitlesAsMarkdownList } from './notion'
 
 export default {
@@ -15,9 +15,11 @@ export default {
 			return fetchParams
 		}
 
+		const parseParams = newParseParams(request, env)
+
 		const notion = new Client({ auth: notionToken })
 		try {
-			const response = await fetchTitlesAsMarkdownList(notion, fetchParams)
+			const response = await fetchTitlesAsMarkdownList(notion, fetchParams, parseParams)
 			return new Response(response)
 		} catch (error) {
 			console.error('Error fetching pages:', error)
