@@ -3,6 +3,11 @@ import { FetchParams } from "./params"
 import { formatInTimeZone } from "date-fns-tz"
 import { QueryDatabaseParameters, SearchResponse } from "@notionhq/client/build/src/api-endpoints"
 
+export type NotionPost = {
+	text: string;
+	created_date: string;
+}
+
 /**
  * タイトルの一覧をMarkdownのリスト形式で取得する
  */
@@ -10,8 +15,8 @@ export async function fetchTitlesAsMarkdownList(notion: Client, params: FetchPar
 	const queryParams = newDatabaseQuery(params)
 	const response = await notion.databases.query(queryParams)
 
-	const titlesAsMarkdownList = getTitlesAsMarkdownList(response, params.indent)
-	return `${titlesAsMarkdownList.join('\n')}\n`
+	const posts = getPostsFromResponse(response)
+	return parseToMarkdown(posts, params.indent)
 }
 
 /**
@@ -49,8 +54,11 @@ export function newDatabaseQuery(params: FetchParams): QueryDatabaseParameters {
 	} as QueryDatabaseParameters
 }
 
-export function getTitlesAsMarkdownList(response: SearchResponse, indent: boolean): string[] {
-	const titlesAsMarkdownList: string[] = []
+/**
+ * SearchResponseから必要なデータを取得する
+ */
+export function getPostsFromResponse(response: SearchResponse): NotionPost[] {
+	const notionPosts: NotionPost[] = []
 	for (const page of response.results) {
 		if (!isFullPage(page)) {
 			continue
@@ -65,24 +73,40 @@ export function getTitlesAsMarkdownList(response: SearchResponse, indent: boolea
 		}
 
 		for (const richText of post.title) {
-			const titleLines = richText.plain_text.split('\n')
-
-			const titleLinesWithListNotationByPage = titleLines.map((title, index) => {
-				const line = `- ${title.trim()}`
-				if (index === 0) {
-					return line
-				}
-
-				// 2行目以降
-				if (indent) {
-					return ' '.repeat(4) + line
-				}
-				return line
+			notionPosts.push({
+				text: richText.plain_text,
+				created_date: page.created_time,
 			})
-
-			titlesAsMarkdownList.push(...titleLinesWithListNotationByPage)
 		}
 
 	}
-	return titlesAsMarkdownList
+	return notionPosts
+}
+
+/**
+ * NotionPostの配列をMarkdown文字列に変換する
+ */
+export function parseToMarkdown(posts: NotionPost[], indent: boolean): string {
+	const titlesAsMarkdownList: string[] = []
+
+	for (const post of posts) {
+		const titleLines = post.text.split('\n')
+
+		const titleLinesWithListNotationByPage = titleLines.map((title, index) => {
+			const line = `- ${title.trim()}`
+			if (index === 0) {
+				return line
+			}
+
+			// 2行目以降
+			if (indent) {
+				return ' '.repeat(4) + line
+			}
+			return line
+		})
+
+		titlesAsMarkdownList.push(...titleLinesWithListNotationByPage)
+	}
+
+	return titlesAsMarkdownList.join('\n')
 }

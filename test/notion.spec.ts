@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { FetchParams } from '../src/params'
-import { newDatabaseQuery } from '../src/notion';
+import { newDatabaseQuery, NotionPost, parseToMarkdown } from '../src/notion';
 
 // Notion APIを叩かないのでモックにする（読み込みに伴うcjsからの変換エラー回避でもある）
 vi.mock('@notionhq/client', () => {
@@ -76,5 +76,36 @@ describe('newDatabaseQuery', () => {
 				}
 			]
 		})
+	})
+})
+
+describe('parseToMarkdown', () => {
+	it('改行文字を含む+インデント設定無し', () => {
+		const post: NotionPost = {
+			text: 'foo\nbar',
+			created_date: '2022-03-01T19:05:00.000Z'
+		}
+
+		const result = parseToMarkdown([post], false)
+		const expectedValue = `
+- foo
+- bar
+	`.trim()
+		expect(result).toEqual(expectedValue)
+	})
+
+	it('改行文字を含む+インデント設定有り', () => {
+		const post: NotionPost = {
+			text: 'foo\nbar',
+			created_date: '2022-03-01T19:05:00.000Z'
+		}
+
+		const result = parseToMarkdown([post], true)
+		const expectedValue = `
+- foo
+    - bar
+`.trim()
+
+		expect(result).toEqual(expectedValue)
 	})
 })
