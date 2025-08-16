@@ -16,7 +16,7 @@ export async function fetchTitlesAsMarkdownList(notion: Client, fetchParams: Fet
 	const response = await notion.databases.query(queryParams)
 
 	const posts = getPostsFromResponse(response)
-	return parseToMarkdown(posts, parseParams)
+	return parseToMarkdown(posts, parseParams) + '\n'
 }
 
 /**
