@@ -232,11 +232,13 @@ describe('newParseParams', () => {
 	it('すべての対応パラメータを渡す', () => {
 		const url = new URL('https://example.com')
 		url.searchParams.set('indent', '')
+		url.searchParams.set('split_by_date', '')
 
 		const request = new IncomingRequest(url.href)
 		const params = newParseParams(request, env)
 
 		expect(params.indent).equal(true)
+		expect(params.splitByDate).equal(true)
 	})
 
 	describe('env', () => {
@@ -263,12 +265,13 @@ describe('newParseParams', () => {
 		})
 	})
 
-	it('indentを渡さない場合はindentがfalseとなること', () => {
+	it('booleanなパラメーターを渡さない場合はfalseとなること', () => {
 		const url = new URL('https://example.com')
 
 		const request = new IncomingRequest(url.href)
 		const params = newParseParams(request, env)
 
 		expect(params.indent).equal(false)
+		expect(params.splitByDate).equal(false)
 	})
 })

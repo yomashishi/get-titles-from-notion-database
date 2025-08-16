@@ -82,6 +82,7 @@ describe('parseToMarkdown', () => {
 	const baseParseParams: ParseParams = {
 		tz: 'Asia/Tokyo',
 		indent: false,
+		splitByDate: false,
 	}
 
 	it('改行文字を含む+インデント設定無し', () => {
