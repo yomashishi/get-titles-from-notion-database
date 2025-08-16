@@ -232,13 +232,13 @@ describe('newParseParams', () => {
 	it('すべての対応パラメータを渡す', () => {
 		const url = new URL('https://example.com')
 		url.searchParams.set('indent', '')
-		url.searchParams.set('split_by_date', '')
+		url.searchParams.set('date_heading', '')
 
 		const request = new IncomingRequest(url.href)
 		const params = newParseParams(request, env)
 
 		expect(params.indent).equal(true)
-		expect(params.splitByDate).equal(true)
+		expect(params.dateHeading).equal(true)
 	})
 
 	describe('env', () => {
@@ -272,6 +272,6 @@ describe('newParseParams', () => {
 		const params = newParseParams(request, env)
 
 		expect(params.indent).equal(false)
-		expect(params.splitByDate).equal(false)
+		expect(params.dateHeading).equal(false)
 	})
 })

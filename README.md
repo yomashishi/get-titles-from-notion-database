@@ -50,6 +50,25 @@ URLに `date` パラメータを `YYYY-MM-DD` 形式で指定すると、その�
 
 ※100件を超えるデータには未対応です。
 
+### 日付の見出しを追加
+
+URLに `date_heading` パラメータを付与することで、日付の見出しが生成できます。
+
+例: `https://{CLOUDFLARE_WORKERS_ENDPOINT}?database_id={YOUR_DATABASE_ID}&date=2025-04-10&to_date=2025-04-12&date_heading=`
+
+出力例:
+
+```markdown
+## 2025-04-10
+
+- foo
+- bar
+
+## 2025-04-12
+
+- baz
+```
+
 ### 認証
 
 Cloudflare Workersのシークレットに `WORKER_SECRET` が設定されている場合、リクエストヘッダに `x-secret: {YOUR_WORKER_SECRET}` を付与しないと利用できないように設定できます。

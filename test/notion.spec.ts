@@ -82,7 +82,7 @@ describe('parseToMarkdown', () => {
 	const baseParseParams: ParseParams = {
 		tz: 'Asia/Tokyo',
 		indent: false,
-		splitByDate: false,
+		dateHeading: false,
 	}
 
 	it('改行文字を含む+インデント設定無し', () => {
@@ -98,7 +98,7 @@ describe('parseToMarkdown', () => {
 		const expectedValue = `
 - foo
 - bar
-	`.trim()
+`.trim()
 		expect(result).toEqual(expectedValue)
 	})
 
@@ -118,5 +118,56 @@ describe('parseToMarkdown', () => {
 `.trim()
 
 		expect(result).toEqual(expectedValue)
+	})
+
+	describe('dateHeading', () => {
+		it('日付の見出しが入ること', () => {
+			const post: NotionPost = {
+				text: 'foo\nbar',
+				created_date: '2022-03-01T00:00:00.000Z'
+			}
+
+			const result = parseToMarkdown([post], {
+				...baseParseParams,
+				dateHeading: true,
+			})
+			const expectedValue = `
+## 2022-03-01
+
+- foo
+- bar
+`.trim()
+
+			expect(result).toEqual(expectedValue)
+		})
+
+		it('複数の日付がある場合、見出しの前後に空行が入ること（初回は前の空行が存在しないこと）', () => {
+			const post1: NotionPost = {
+				text: 'foo\nbar',
+				created_date: '2022-03-01T00:00:00.000Z'
+			}
+			const post2: NotionPost = {
+				text: 'foo\nbar',
+				created_date: '2022-03-02T00:00:00.000Z'
+			}
+
+			const result = parseToMarkdown([post1, post2], {
+				...baseParseParams,
+				dateHeading: true,
+			})
+			const expectedValue = `
+## 2022-03-01
+
+- foo
+- bar
+
+## 2022-03-02
+
+- foo
+- bar
+`.trim()
+
+			expect(result).toEqual(expectedValue)
+		})
 	})
 })

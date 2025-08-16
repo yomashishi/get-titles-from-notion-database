@@ -11,7 +11,7 @@ export interface FetchParams {
 export interface ParseParams {
 	tz: string
 	indent: boolean
-	splitByDate: boolean
+	dateHeading: boolean
 }
 
 /**
@@ -76,12 +76,12 @@ export function newParseParams(request: Request, env: Env): ParseParams {
 	const { searchParams } = new URL(request.url)
 
 	const indent = searchParams.has('indent')
-	const splitByDate = searchParams.has('split_by_date')
+	const dateHeading = searchParams.has('date_heading')
 
 	const parseParams: ParseParams = {
 		tz,
 		indent,
-		splitByDate
+		dateHeading
 	}
 	return parseParams
 }

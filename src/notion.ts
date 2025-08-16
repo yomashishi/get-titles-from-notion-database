@@ -87,13 +87,14 @@ export function getPostsFromResponse(response: SearchResponse): NotionPost[] {
  * NotionPostの配列をMarkdown文字列に変換する
  */
 export function parseToMarkdown(posts: NotionPost[], params: ParseParams): string {
-	const titlesAsMarkdownList: string[] = []
+	const postsDateMap = new Map()
 
+	// Markdown形式のリスト表記に変換して日付ごとにまとめる
 	for (const post of posts) {
-		const titleLines = post.text.split('\n')
+		const date = formatInTimeZone(post.created_date, params.tz, 'yyyy-MM-dd')
 
-		const titleLinesWithListNotationByPage = titleLines.map((title, index) => {
-			const line = `- ${title.trim()}`
+		const markdownList = post.text.split('\n').map((body, index) => {
+			const line = `- ${body.trim()}`
 			if (index === 0) {
 				return line
 			}
@@ -105,8 +106,32 @@ export function parseToMarkdown(posts: NotionPost[], params: ParseParams): strin
 			return line
 		})
 
-		titlesAsMarkdownList.push(...titleLinesWithListNotationByPage)
+		if (postsDateMap.has(date)) {
+			const current = postsDateMap.get(date)
+			postsDateMap.set(date, [
+				...current,
+				...markdownList,
+			])
+		} else {
+			postsDateMap.set(date, markdownList)
+		}
 	}
 
-	return titlesAsMarkdownList.join('\n')
+	// 日付ごとにまとめたデータを整形する
+	const response: string[] = []
+	let isFirst = true
+	postsDateMap.forEach((list, date) => {
+		if (params.dateHeading) {
+			// 日付の見出しの前後に空行を追加する（初回のみ前の空行は追加しない）
+			if (!isFirst) {
+				response.push('')
+			}
+			response.push(`## ${date}`, '')
+
+			isFirst = false
+		}
+
+		response.push(...list)
+	})
+	return response.join('\n')
 }
